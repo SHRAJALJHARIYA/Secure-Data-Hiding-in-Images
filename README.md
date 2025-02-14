@@ -111,5 +111,3 @@ This project is a **Flask-based web application** that allows users to securely 
 This project provides a simple and effective way to **securely hide messages** in images using **steganography**. It is useful for anyone looking to **safeguard sensitive data** in a visually imperceptible way.
 
 ---
-
-Let me know if you need modifications! 🚀
