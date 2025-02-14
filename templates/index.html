@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Image Encryption & Decryption</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+                background-color: rgb(44, 51, 51);
+            }
+
+            .enc {
+                background-color: rgb(119, 176, 170);
+                border-radius: 15px;
+                padding: 20px;
+            }
+
+            h2 {
+                text-align: center;
+                font-weight: bold;
+                font-size: 32px;
+                color: #00FF9C;
+            }
+
+            h1 {
+                text-align: center;
+                font-weight: bold;
+                font-size: 32px;
+                color: #3C3D37;
+
+            }
+
+            .nav-tabs .nav-link {
+                font-weight: bold;
+                color: rgb(255, 255, 255);
+            }
+
+            .nav-tabs .nav-link.active {
+
+                border: 1px solid #000000;
+                color: black;
+                border-radius: 10px;
+                margin: 2px;
+            }
+
+            .nav {
+                user-select: text;
+                border: 0px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container mt-5" style="width: 40vw;">
+            <h2>Secure Data Hiding in Images</h2>
+
+            <ul class="nav nav-tabs mt-3">
+                <li class="nav-item">
+                    <a id="encryptButton" class="nav-link active" href="#" onclick="showSection('encrypt')">Encrypt</a>
+                </li>
+                <li class="nav-item">
+                    <a id="decryptButton" class="nav-link" href="#" onclick="showSection('decrypt')">Decrypt</a>
+                </li>
+            </ul>
+
+            <div class="card p-4 mt-3 enc">
+                <div id="encryptSection">
+                    <h1>Encryption</h1>
+                    <input type="file" id="imageUpload" accept="image/*" class="form-control">
+                    <input type="text" id="secretMessage" class="form-control mt-2" placeholder="Enter Secret Message">
+                    <input type="text" id="encryptionKey" class="form-control mt-2" placeholder="Enter Encryption Key">
+                    <button id="encryptButtonAction" class="btn btn-success mt-3 w-100">Encrypt</button>
+                </div>
+
+                <div id="decryptSection" style="display: none;">
+                    <h1>Decryption</h1>
+                    <input type="file" id="imageUploadDecrypt" accept="image/png" class="form-control">
+                    <input type="text" id="decryptionKey" class="form-control mt-2" placeholder="Enter Decryption Key">
+                    <button id="decryptButtonAction" class="btn btn-danger mt-3 w-100">Decrypt</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                // Get elements
+                const encryptSection = document.getElementById("encryptSection");
+                const decryptSection = document.getElementById("decryptSection");
+                const encryptButton = document.getElementById("encryptButton");
+                const decryptButton = document.getElementById("decryptButton");
+
+                // Function to toggle sections
+                const showSection = (section) => {
+                    const isEncrypt = section === "encrypt";
+                    encryptSection.style.display = isEncrypt ? "block" : "none";
+                    decryptSection.style.display = isEncrypt ? "none" : "block";
+                    encryptButton.classList.toggle("active", isEncrypt);
+                    decryptButton.classList.toggle("active", !isEncrypt);
+                };
+
+                // Event listeners for toggling
+                encryptButton.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    showSection("encrypt");
+                });
+
+                decryptButton.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    showSection("decrypt");
+                });
+
+                // Default: Show encryption section on page load
+                showSection("encrypt");
+
+                // Function to handle encryption
+                const encryptImage = () => {
+                    const formData = new FormData();
+                    const image = document.getElementById("imageUpload").files[0];
+                    const message = document.getElementById("secretMessage").value;
+                    const key = document.getElementById("encryptionKey").value;
+
+                    if (!image || !message || !key) return alert("Please provide all required fields!");
+
+                    formData.append("image", image);
+                    formData.append("message", message);
+                    formData.append("key", key);
+
+                    fetch("/encrypt", { method: "POST", body: formData })
+                        .then(response => response.json())
+                        .then(data => data.error ? alert("Error: " + data.error) : window.location.href = data.image_url)
+                        .catch(error => console.error("Encryption Error:", error));
+                };
+
+                // Function to handle decryption
+                const decryptImage = () => {
+                    const formData = new FormData();
+                    const image = document.getElementById("imageUploadDecrypt").files[0];
+                    const key = document.getElementById("decryptionKey").value;
+
+                    if (!image || !key) return alert("Please provide all required fields!");
+
+                    formData.append("image", image);
+                    formData.append("key", key);
+
+                    fetch("/decrypt", { method: "POST", body: formData })
+                        .then(response => response.json())
+                        .then(data => alert(data.error ? "Error: " + data.error : "Decrypted Message: " + data.message))
+                        .catch(error => console.error("Decryption Error:", error));
+                };
+
+                // Attach event listeners for encryption and decryption
+                document.getElementById("encryptButtonAction").addEventListener("click", encryptImage);
+                document.getElementById("decryptButtonAction").addEventListener("click", decryptImage);
+            });
+
+        </script>
+    </body>
+
+    </html>
